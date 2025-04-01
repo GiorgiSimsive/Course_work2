@@ -1,5 +1,3 @@
-from typing import Dict, Union
-
 import requests
 
 from src.api import JobAPI
@@ -8,15 +6,19 @@ from src.api import JobAPI
 class HeadHunterAPI(JobAPI):
     """Класс для работы с API hh.ru."""
 
-    BASE_URL = "https://api.hh.ru/vacancies"
+    __slots__ = ("base_url",)
 
-    def get_vacancies(self, query: str) -> list:
-        """Получает вакансии по запросу из hh.ru."""
-        params: Dict[str, Union[str, int]] = {"text": query, "per_page": 20, "page": 0}
-        response = requests.get(self.BASE_URL, params=params)
+    def __init__(self) -> None:
+        self.base_url = "https://api.hh.ru/vacancies"
 
-        if response.status_code == 200:
+    def get_vacancies(self, keyword: str) -> list:
+        """Получает список вакансий с hh.ru по ключевому слову."""
+        params = {"text": keyword, "per_page": 20, "page": 0}
+
+        try:
+            response = requests.get(self.base_url, params=params)  # type: ignore
+            response.raise_for_status()
             return response.json().get("items", [])  # type: ignore
-        else:
-            print(f"Ошибка {response.status_code}: {response.text}")
+        except requests.RequestException as e:
+            print(f"Ошибка при запросе к API hh.ru: {e}")
             return []

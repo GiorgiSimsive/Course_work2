@@ -1,6 +1,6 @@
 from src.hh_api import HeadHunterAPI
 from src.json_saver import JSONSaver
-from src.vecancy import Vacancy
+from src.vacancy import Vacancy
 
 
 def user_interaction() -> None:
@@ -23,18 +23,20 @@ def user_interaction() -> None:
         if choice == "1":
             search_query = input("Введите поисковый запрос: ")
             vacancies_data = hh_api.get_vacancies(search_query)
-            vacancies_list = [Vacancy(**vac) for vac in vacancies_data]
+            vacancies_list = Vacancy.create_from_hh_data(vacancies_data)
 
-            for vacancy in vacancies_list:
-                json_saver.add_vacancy(vacancy)
+            json_saver.save_to_file(vacancies_list)
             print(f"Найдено и сохранено {len(vacancies_list)} вакансий.")
 
         elif choice == "2":
-            top_n = int(input("Введите количество вакансий для вывода в топ N: "))
-            vacancies = json_saver.load_from_file()
-            sorted_vacancies = sorted(vacancies, key=lambda v: v.salary, reverse=True)
-            for vac in sorted_vacancies[:top_n]:
-                print(vac)
+            try:
+                top_n = int(input("Введите количество вакансий для вывода в топ N: "))
+                vacancies = json_saver.load_from_file()
+                sorted_vacancies = sorted(vacancies, key=lambda v: v.salary if v.salary else -1, reverse=True)
+                for vac in sorted_vacancies[:top_n]:
+                    print(vac)
+            except ValueError:
+                print("Ошибка: Введите корректное число.")
 
         elif choice == "3":
             keyword = input("Введите ключевое слово для фильтрации вакансий: ").lower()

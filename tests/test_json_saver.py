@@ -3,7 +3,7 @@ import os
 import pytest
 
 from src.json_saver import JSONSaver
-from src.vecancy import Vacancy
+from src.vacancy import Vacancy
 
 
 @pytest.fixture
